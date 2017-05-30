@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include "util.h"
+#include "symbol.h"
+#include "absyn.h"
+#include "table.h"
+#include "errormsg.h"
+#include "types.h"
+
+typedef struct expr_type_s expr_type_t;
+struct expr_type_s
+{
+    tr_expr_t expr;
+    type_t type;
+};
+
+static expr_type_t expr_type(tr_expr_t expr, type_t type)
+{
+    expr_type_t result;
+    result.expr = expr;
+    result.type = type;
+    return result;
+};
+
+
+typedef expr_type_t (*trans_expr_func)(tr_level_t level, ast_expr_t);
+static trans_expr_func _trans_expr_funcs[] =
+{
+//    trans_nil_expr,
+//    trans_var_expr,
+//    trans_num_expr,
+//    trans_string_expr,
+//    trans_call_expr,
+//    trans_op_expr,
+//    trans_record_expr,
+//    trans_array_expr,
+//    trans_seq_expr,
+//    trans_if_expr,
+//    trans_while_expr,
+//    trans_for_expr,
+//    trans_break_expr,
+//    trans_let_expr,
+    trans_assign_expr,
+};
+
+
+static expr_type_t trans_assign_expr(tr_level_t level, ast_expr_t expr)
+{
+    expr_type_t var = trans_var(level, expr->u.assign.var);
+    expr_type_t et = trans_expr(level, expr->u.assign.expr);
+
+    if (!ty_match(var.type, et.type))
+        em_error(expr->pos, "type mismatch");
+
+    if (expr->u.assign.var->kind == AST_SIMPLE_VAR && var.type->kind == TY_INT)
+    {
+        /* Check for the assignment to the for variable. */
+        ast_var_t v = expr->u.assign.var;
+        env_entry_t entry = sym_lookup(_venv, v->u.simple);
+        if (entry && entry->kind == ENV_VAR_ENTRY && entry->u.var.for_)
+            em_error(expr->pos, "assigning to the for variable");
+    }
+
+    return expr_type(tr_assign_expr(var.expr, et.expr), ty_void());
+}
