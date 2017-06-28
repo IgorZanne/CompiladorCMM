@@ -23,7 +23,6 @@ void adjust();
 LETTER    [a-zA-Z]     
 DIGIT     [0-9]
 ID        {LETTER}({LETTER}|{DIGIT}|"_")*
-HEX		  [a-fA-F0-9]{2}
 SPECIAL   [-_.,;:?^~!@#$%&´`+/§¨=*()¹²³£¢¬\{\}\[\]àáãäâèéẽëêìíĩïîòóöôõùúûũüçÀÁÂÃÄÈÉẼÊËÌÍÏĨÎÒÓÕÔÖÙÚŨÛÜÇ]
      
 %%
@@ -104,7 +103,7 @@ break {
 	char* name = (char*)malloc((yyleng+1)*sizeof(char));
 	strcpy(name, yytext);
 
-//	yylval.sval = name;
+	//yylval.sval = name;
 
 	adjust();
 	printf("ID ");
@@ -112,7 +111,7 @@ break {
      
 {DIGIT}+ {
 	adjust();
-//	yylval.ival = atoi(yytext);
+	//yylval.ival = atoi(yytext);
 	printf("INT ");
 }
 
@@ -141,6 +140,81 @@ break {
 	adjust();
 	string_ptr = str;
 	BEGIN(IN_STRING);
+}
+
+<IN_STRING>
+{
+	\" {
+		adjust();
+		
+		*string_ptr = '\0';
+
+		//yylval.sval = (char*)str;
+
+		BEGIN(INITIAL);
+		printf("STRING ");
+	}
+	({LETTER}|{DIGIT}|{SPECIAL}|" ")* {
+		int i;
+		adjust();
+		for(i = 0; i < strlen(yytext); i++) {
+			*string_ptr++ = yytext[i];
+		} 
+	}
+	\\a {
+		adjust();
+		*string_ptr++ = '\a';
+	}
+	\\b {
+		adjust();
+		*string_ptr++ = '\b';
+	}
+	\\f {
+		adjust();
+		*string_ptr++ = '\f';
+	}
+	\\n {
+		adjust();
+		*string_ptr++ = '\n';
+	}
+	\\r {
+		adjust();
+		*string_ptr++ = '\r';
+	}
+	\\t {
+		adjust();
+		*string_ptr++ = '\t';
+	}
+	\\v {
+		adjust();
+		*string_ptr++ = '\v';
+	}
+	\\{DIGIT}{3} {
+		adjust();
+		int i = atoi(&yytext[1]);
+		if(i > 255){
+			//yyerror("string error 1");
+		}
+		
+		*string_ptr++ = (char)i;
+	}
+
+	\\ {
+		adjust();
+		*string_ptr++ = '\\';
+	}
+	\\\" {
+		adjust();
+		*string_ptr++ = '"';
+	}
+	<<EOF>> {
+		adjust();
+		//yyerror("string error 2");
+	}
+	. {
+		adjust();
+		//yyerror("string error 3");
+	}
 }
 
 "(" {
