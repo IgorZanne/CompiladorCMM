@@ -1,0 +1,91 @@
+
+program:
+	dec meth
+;
+
+exp:  
+	  typ
+	| ID  
+	| com
+;
+
+expList: 
+      exp parametro
+;
+parametro: 
+      COMMA exp parametro
+;
+
+dec:
+	  TYPE ID SEMICOLON
+	| TYPE ID sdec SEMICOLON
+	| TYPE ID ASSIGN val sdec SEMICOLON
+;
+
+sdec:
+	  COLON ID sdec
+	| COLON ID ASSIGN val sdec
+;
+
+com:
+      ID atrib 
+	| ifExp	
+	| WHILE LBRACK exp RBRACK LBRACE exp RBRACE
+	| FOR LPAREN dec SEMICOLON op SEMICOLON  RPAREN
+	| ID LPAREN expList RPAREN
+	| READ ID
+	| WRITE expList
+;
+
+ifExp:  
+	  IF exp THEN bloc
+	| IF exp THEN bloc ELSE bloc
+;
+
+bloc: 
+	  dec com
+    | BREAK
+    | RETURN
+;
+
+typ:
+	  INT
+	| STRING
+	| BOOL
+;
+
+meth:
+	  func
+	| proc
+;
+
+proc: 
+      ID LPAREN decs RPAREN LBRACE bloc RBRACE
+;
+
+func:
+      typ ID LPAREN decs RPAREN LBRACE bloc RBRACE
+;            
+
+op:   
+	  exp TIMES exp
+    | exp DIVIDE exp
+    | MINUS exp
+    | exp MINUS exp
+    | exp PLUS exp
+    | exp EQ exp
+    | exp NEQ exp
+    | exp LT exp
+    | exp LE exp
+    | exp GT exp
+    | exp GE exp
+;
+
+atrib:  
+	  ASSIGN
+    | PLUS ASSIGN
+    | MINUS ASSIGN
+    | TIMES ASSIGN
+    | DIVIDE ASSIGN
+    | PERC ASSIGN
+;      

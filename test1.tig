@@ -1,6 +1,0 @@
-/* an array type and an array variable */
-let
-	var n := 8
-in
-
-end

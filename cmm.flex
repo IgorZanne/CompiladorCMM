@@ -1,5 +1,5 @@
 /* scanner for a toy Pascal-like language */
-  
+%option noyywrap  
 %{
 #define MAX_STR_SIZE 1024
 
@@ -141,76 +141,6 @@ break {
 	adjust();
 	string_ptr = str;
 	BEGIN(IN_STRING);
-}
-
-<IN_STRING>
-{
-	\" {
-		adjust();
-		
-		*string_ptr = '\0';
-
-	//	yylval.sval = (char*)str;
-
-		BEGIN(INITIAL);
-		printf("STRING ");
-	}
-	({LETTER}|{DIGIT}|{SPECIAL}|" ")* {
-		int i;
-		adjust();
-//for(i = 0; i < strlen(yytext); i++) {
-//			*string_ptr++ = yytext[i];
-		//} 
-	}
-	\\a {
-		adjust();
-		*string_ptr++ = '\a';
-	}
-	\\b {
-		adjust();
-		*string_ptr++ = '\b';
-	}
-	\\f {
-		adjust();
-		*string_ptr++ = '\f';
-	}
-	\\n {
-		adjust();
-		*string_ptr++ = '\n';
-	}
-	\\r {
-		adjust();
-		*string_ptr++ = '\r';
-	}
-	\\t {
-		adjust();
-		*string_ptr++ = '\t';
-	}
-	\\v {
-		adjust();
-		*string_ptr++ = '\v';
-	}
-	\\{DIGIT}{3} {
-		adjust();
-	//	int i = atoi(&yytext[1]);
-	//	if(i > 255){
-	//		yyerror("string error 1");
-	//	}
-		
-		//*string_ptr++ = (char)i;
-	}
-	\\\" {
-		adjust();
-		*string_ptr++ = '"';
-	}
-	<<EOF>> {
-		adjust();
-		//yyerror("string error 2");
-	}
-	. {
-		adjust();
-	//	yyerror("string error 3");
-	}
 }
 
 "(" {
