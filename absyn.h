@@ -43,7 +43,7 @@ struct A_var_
 struct A_exp_
       {enum {A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
 	       A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
-	       A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp} kind;
+	       A_whileExp, A_forExp, A_breakExp, A_arrayExp} kind;
        A_pos pos;
        union {A_var var;
 	      /* nil; - needs only the pos */
@@ -110,7 +110,6 @@ A_exp A_IfExp(A_pos pos, A_exp test, A_exp then, A_exp elsee);
 A_exp A_WhileExp(A_pos pos, A_exp test, A_exp body);
 A_exp A_ForExp(A_pos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body);
 A_exp A_BreakExp(A_pos pos);
-A_exp A_LetExp(A_pos pos, A_decList decs, A_exp body);
 A_exp A_ArrayExp(A_pos pos, S_symbol typ, A_exp size, A_exp init);
 A_dec A_FunctionDec(A_pos pos, S_symbol name, A_fieldList params, S_symbol result, A_exp body);
 A_dec A_VarDec(A_pos pos, S_symbol var, S_symbol typ, A_exp init);

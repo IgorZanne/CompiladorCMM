@@ -146,15 +146,6 @@ A_exp A_BreakExp(A_pos pos)
  return p;
 }
 
-A_exp A_LetExp(A_pos pos, A_decList decs, A_exp body)
-{A_exp p = checked_malloc(sizeof(*p));
- p->kind=A_letExp;
- p->pos=pos;
- p->u.let.decs=decs;
- p->u.let.body=body;
- return p;
-}
-
 A_exp A_ArrayExp(A_pos pos, S_symbol typ, A_exp size, A_exp init)
 {A_exp p = checked_malloc(sizeof(*p));
  p->kind=A_arrayExp;
