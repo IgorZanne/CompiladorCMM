@@ -24,16 +24,7 @@ void yyerror(char *s)
   int pos;
   int ival;
   string sval;
-  struct A_var_       *A_var;
   struct A_exp_       *A_exp;
-  struct A_dec_       *A_dec;
-  struct A_ty_      *A_ty;
-  struct A_field_     *A_field;
-  struct A_fieldList_   *A_fieldList;
-  struct A_expList_     *A_expList;
-  struct A_decList_     *A_decList;
-  struct A_efield_    *A_efield;
-  struct A_efieldList_  *A_efieldList;
   }
 
 %token <sval> ID STRING
@@ -42,23 +33,13 @@ void yyerror(char *s)
 %token 
   COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK
   LBRACE RBRACE DOT
-  PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE
+  PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE PERC
   AND OR ASSIGN
   ARRAY IF THEN ELSE WHILE FOR TO DO IN END OF 
   BREAK NIL
   FUNCTION VAR TYPE
 
-%type <A_var> lvalue
-%type <A_exp> exp exps pri_exp or_exp and_exp rel_exp add_exp times_exp
-%type <A_dec> method_dec nametype_dec var_dec dec
-%type <A_ty> type
-%type <A_field> type_field
-%type <A_fieldList> type_fields function_fields
-%type <A_expList> function_args exp_list
-
-%type <A_decList> decs
-%type <A_efield> record_field
-%type <A_efieldList> record_fields
+%type <A_exp> expr oper atrib lite
 
 %nonassoc ASSIGN
 
@@ -75,101 +56,35 @@ void yyerror(char *s)
 
 %%
 
-/* This is a skeleton grammar file, meant to illustrate what kind of
- * declarations are necessary above the %% mark.  Students are expected
- *  to replace the two dummy productions below with an actual grammar. 
- * printf("INTEGERS: %i - %i\n", $1, $2);
- */
+program: expr {absyn_root=$1;}
 
-program: exp {absyn_root=$1;}
+expr:
+    ID atrib oper {$$=A_AssignExp(EM_tokPos, $1, $3);}
 
-pri_exp: NIL                        {$$=A_NilExp(EM_tokPos);}
-  | INT                             {$$=A_IntExp(EM_tokPos, $1);}
-  | STRING                          {$$=A_StringExp(EM_tokPos, $1);}
-  | ID LPAREN function_args RPAREN  {$$=A_CallExp(EM_tokPos, S_Symbol($1), $3);} 
-  | lvalue                          {$$=A_VarExp(EM_tokPos, $1);}
-  | MINUS pri_exp %prec UMINUS      {$$=A_OpExp(EM_tokPos, A_minusOp, A_IntExp(EM_tokPos, 0), $2);}
-  | exps                            {$$=$1;}
+lite:
+    INT    {$$=A_IntExp(EM_tokPos, $1);}
+  | STRING {$$=A_StringExp(EM_tokPos, $1);}
 
-exps: LPAREN exp_list RPAREN {$$=A_SeqExp(EM_tokPos, $2);}
+oper:
+    lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
+  | lite DIVIDE lite  {$$=A_OpExp(EM_tokPos, A_divideOp, $1, $3);}
+  | lite MINUS lite   {$$=A_OpExp(EM_tokPos, A_minusOp, $1, $3);}
+  | lite PLUS lite    {$$=A_OpExp(EM_tokPos, A_plusOp, $1, $3);}
+  | lite GT lite      {$$=A_OpExp(EM_tokPos, A_gtOp, $1, $3);}
+  | lite LT lite      {$$=A_OpExp(EM_tokPos, A_ltOp, $1, $3);}
+  | lite NEQ lite     {$$=A_OpExp(EM_tokPos, A_neqOp, $1, $3);}
+  | lite EQ lite      {$$=A_OpExp(EM_tokPos, A_eqOp, $1, $3);}
+  | lite LE lite      {$$=A_OpExp(EM_tokPos, A_leOp, $1, $3);}
+  | lite GE lite      {$$=A_OpExp(EM_tokPos, A_geOp, $1, $3);}
+  | MINUS lite        {$$=A_OpExp(EM_tokPos, A_minusOp, NULL, $2);}
 
-exp_list:                   {$$=NULL;}
-  | exp                     {$$=A_ExpList($1, NULL);}
-  | exp SEMICOLON exp_list  {$$=A_ExpList($1, $3);}
-
-exp: ID LBRACK exp RBRACK OF exp                                                {$$=A_ArrayExp(EM_tokPos, S_Symbol($1), $3, $6);}
-  | ID LBRACE record_fields RBRACE                                              {$$=A_RecordExp(EM_tokPos, S_Symbol($1), $3);}
-  | lvalue ASSIGN exp                                                           {$$=A_AssignExp(EM_tokPos, $1, $3);}
-  | IF LPAREN exp RPAREN THEN LBRACE exp RBRACE                                 {$$=A_IfExp(EM_tokPos, $3, $7, NULL);}
-  | IF LPAREN exp RPAREN THEN LBRACE exp RBRACE ELSE LBRACE exp RBRACE          {$$=A_IfExp(EM_tokPos, $3, $7, $11);}
-  | WHILE LPAREN exp RPAREN LBRACE exp RBRACE                                   {$$=A_WhileExp(EM_tokPos, $3, $6);}
-  | FOR LPAREN var_dec SEMICOLON exp SEMICOLON var_dec RPAREN LBRACE exp RBRACE {$$=A_ForExp(EM_tokPos, S_Symbol($3), $5, $7, $10);}
-  | BREAK                                                                       {$$=A_BreakExp(EM_tokPos);}
-  | or_exp                                                                      {$$=$1;}
-
-or_exp: and_exp       {$$=$1;}
-  | or_exp OR and_exp {$$=A_OpExp(EM_tokPos, A_orOp, $1, $3);}
-
-and_exp: rel_exp        {$$=$1;}
-  | and_exp AND rel_exp {$$=A_OpExp(EM_tokPos, A_andOp, $1, $3);}
-
-rel_exp: add_exp        {$$=$1;}
-  | rel_exp GT add_exp  {$$=A_OpExp(EM_tokPos, A_gtOp, $1, $3);}
-  | rel_exp LT add_exp  {$$=A_OpExp(EM_tokPos, A_ltOp, $1, $3);}
-  | rel_exp NEQ add_exp {$$=A_OpExp(EM_tokPos, A_neqOp, $1, $3);}
-  | rel_exp EQ add_exp  {$$=A_OpExp(EM_tokPos, A_eqOp, $1, $3);}
-  | rel_exp LE add_exp  {$$=A_OpExp(EM_tokPos, A_leOp, $1, $3);}
-  | rel_exp GE add_exp  {$$=A_OpExp(EM_tokPos, A_geOp, $1, $3);}
-
-add_exp: times_exp          {$$=$1;}
-  | add_exp PLUS times_exp  {$$=A_OpExp(EM_tokPos, A_plusOp, $1, $3);}
-  | add_exp MINUS times_exp {$$=A_OpExp(EM_tokPos, A_minusOp, $1, $3);}
-
-times_exp: pri_exp            {$$=$1;}
-  | times_exp TIMES pri_exp   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
-  | times_exp DIVIDE pri_exp  {$$=A_OpExp(EM_tokPos, A_divideOp, $1, $3);}
-
-record_fields:                        {$$=NULL;}
-  | record_field                      {$$=A_EfieldList($1, NULL);}
-  | record_field COMMA record_fields  {$$=A_EfieldList($1, $3);}
-
-record_field: ID EQ exp {$$=A_Efield(EM_tokPos, S_Symbol($1), $3);}
-
-lvalue: ID                    {$$=A_SimpleVar(EM_tokPos, S_Symbol($1));}
-  | lvalue DOT ID             {$$=A_FieldVar(EM_tokPos, $1, S_Symbol($3));}
-  | lvalue LBRACK exp RBRACK  {$$=A_SubscriptVar(EM_tokPos, $1, $3);}
-  | ID LBRACK exp RBRACK      {$$=A_SubscriptVar(EM_tokPos, A_SimpleVar(EM_tokPos,S_Symbol($1)), $3);}
-
-function_args:              {$$=NULL;}
-  | exp                     {$$=A_ExpList($1, NULL);}
-  | exp COMMA function_args {$$=A_ExpList($1, $3);}
-
-decs: dec     {$$=A_DecList($1, NULL);}
-  | dec decs  {$$=A_DecList($1, $2);}
-
-dec:  nametype_dec  {$$=$1;} //type dec
-  | var_dec         {$$=$1;}
-  | method_dec    {$$=$1;}
-
-method_dec: ID LPAREN function_fields RPAREN LBRACK exp RBRACK {$$=A_FunctionDec(EM_tokPos, S_Symbol($1), $3, NULL, $6);}
-  | TYPE ID LPAREN function_fields RPAREN LBRACK exp RBRACK  {$$=A_FunctionDec(EM_tokPos, S_Symbol($2), $4, NULL, $7);}
-  
-function_fields:  {$$=NULL;}
-  | type_fields   {$$=$1;}
-
-var_dec: VAR ID ASSIGN exp      {$$=A_VarDec(EM_tokPos, S_Symbol($2), NULL, $4);} //var dec without type
-  | VAR ID COLON ID ASSIGN exp  {$$=A_VarDec(EM_tokPos, S_Symbol($2), S_Symbol($4), $6);} //var dec with type
-
-nametype_dec: TYPE ID EQ type {$$=A_TypeDec(EM_tokPos, S_Symbol($2), $4);}
-
-type: ID                      {$$=A_NameTy(EM_tokPos, S_Symbol($1));}
-  | LBRACE type_fields RBRACE {$$=A_RecordTy(EM_tokPos, $2);}
-  | ARRAY OF ID               {$$=A_ArrayTy(EM_tokPos, S_Symbol($3));}
-
-type_fields: type_field           {$$=A_FieldList($1, NULL);}
-  | type_field COMMA type_fields  {$$=A_FieldList($1, $3);}
-
-type_field: ID COLON ID {$$=A_Field(EM_tokPos, S_Symbol($1), S_Symbol($3));}
+atrib:  
+    ASSIGN        {$$=NULL;}
+  | PLUS ASSIGN   {$$=NULL;}
+  | MINUS ASSIGN  {$$=NULL;}
+  | TIMES ASSIGN  {$$=NULL;}
+  | DIVIDE ASSIGN {$$=NULL;}
+  | PERC ASSIGN   {$$=NULL;}
 
 %% 
 
@@ -180,5 +95,4 @@ A_exp parse(string filename)
     return absyn_root;
   else
     return NULL;
-  
 }
