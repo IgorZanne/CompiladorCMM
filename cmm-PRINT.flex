@@ -336,22 +336,22 @@ break {
 
 "+=" {
 	adjust();
-	printf(" ");
+	printf("INC ");
 }
 
 "-=" {
 	adjust();
-	printf(" ");
+	printf("DEC ");
 }
 	
 "*=" {
 	adjust();
-	printf(" ");
+	printf("MULT ");
 }
 
 "/=" {
 	adjust();
-	printf(" ");
+	printf("MOD ");
 }
 
 "%=" {
@@ -361,7 +361,7 @@ break {
 
 "?" {
 	adjust();
-	printf(" ");
+	printf("QUESTION ");
 }
    	
 ":" {
