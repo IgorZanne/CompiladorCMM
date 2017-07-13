@@ -6,8 +6,10 @@
 /* need this for the call to atof() below */
 #include <math.h>
 #include <string.h>
-#include "util.h"
 #include "errormsg.h"
+#include "cmm-BACKUP.tab.h"
+#include "util.h"
+
 
 int nesting = 0;
 char str[MAX_STR_SIZE];
@@ -29,72 +31,72 @@ SPECIAL   [-_.,;:?^~!@#$%&´`+/§¨=*()¹²³£¢¬\{\}\[\]àáãäâèéẽëê
 
 array {
 	adjust();
-	printf("ARRAY ");
+	return ARRAY;
 }
 
 if {
 	adjust();
-	printf("IF ");
+	return IF;
 }
 
 else {
 	adjust();
-	printf("ELSE ");
+	return ELSE;
 }
 
 read {
 	adjust();
-	printf("READ ");
+	return READ;
 }
 
 write {
 	adjust();
-	printf("WRITE ");
+	return WRITE;
 }
 
 while {
 	adjust();
-	printf("WHILE ");
+	return WHILE;
 }
 
 for {
 	adjust();
-	printf("FOR ");
+	return FOR;
 }
 
 bool {
 	adjust();
-	printf("BOOL ");
+	return BOOL;
 }
 
 false {
 	adjust();
-	printf("FALSE ");
+	return FALSE;
 }
 
 true {
 	adjust();
-	printf("TRUE ");
+	return TRUE;
 }
 
 return {
 	adjust();
-	printf("RETURN ");
+	return RETURN;
 }
 
 string {
 	adjust();
-	printf("STRING ");
+	return STRING;
 }
 
 int {
 	adjust();
-	printf("INT ");
+	return INT;
 }
 
 break {
 	adjust();
-	printf("BREAK ");
+	return BREAK;
 }
 
 
@@ -106,13 +108,13 @@ break {
 	//yylval.sval = name;
 
 	adjust();
-	printf("ID ");
+	return ID;
 }
      
 {DIGIT}+ {
 	adjust();
 	//yylval.ival = atoi(yytext);
-	printf("INT ");
+	return INT;
 }
 
      
@@ -152,7 +154,7 @@ break {
 		//yylval.sval = (char*)str;
 
 		BEGIN(INITIAL);
-		printf("STRING ");
+		return STRING;
 	}
 	({LETTER}|{DIGIT}|{SPECIAL}|" ")* {
 		int i;
@@ -219,122 +221,153 @@ break {
 
 "(" {
 	adjust();
-	printf("LPAREN ");
+	return LPAREN;
 }
 
 ")" {
 	adjust();
-	printf("RPAREN ");
+	return RPAREN;
 }
 
 "[" {
 	adjust();
-	printf("LBRACK ");
+	return LBRACK;
 }
 
 "]" {
 	adjust();
-	printf("RBRACK ");
+	return RBRACK;
 }
 
 "{" {
 	adjust();
-	printf("LBRACE ");
+	return LBRACE;
 }
 
 "}" {
 	adjust();
-	printf("RBRACE ");
+	return RBRACE;
 }
 
 "," {
 	adjust();
-	printf("COMMA ");
+	return COMMA;
 }
 
 ";" {
 	adjust();
-	printf("SEMICOLON ");
+	return SEMICOLON;
 }
 
 "." {
 	adjust();
-	printf("DOT ");
+	return DOT;
 }
 
 "+" {
 	adjust();
-	printf("PLUS ");
+	return PLUS;
 }
 
 "-" {
 	adjust();
-	printf("MINUS ");
+	return MINUS;
 }
 
 "*" {
 	adjust();
-	printf("TIMES ");
+	return TIMES;
 }
 
 "/" {
 	adjust();
-	printf("DIVIDE ");
+	return DIVIDE;
 }
+
 
 "==" {
 	adjust();
-	printf("EQ ");
+	return EQ;
 }
 
 "!=" {
 	adjust();
-	printf("NEQ ");
+	return NEQ;
 }
 
 ">" {
 	adjust();
-	printf("GT ");
+	return GT;
 }
 
 ">=" {
 	adjust();
-	printf("GE ");
+	return GE;
 }
 
 "<" {
 	adjust();
-	printf("LT ");
+	return LT;
 }
 
 "<=" {
 	adjust();
-	printf("LE ");
+	return LE;
 }
 
 "||" {
 	adjust();
-	printf("OR ");
+	return OR;
 }
 
 "&&" {
 	adjust();
-	printf("AND ");
+	return AND;
 }
 
 "!" {
 	adjust();
-	printf("NOT ");
+	return NOT;
 }
 
 "=" {
 	adjust();
-	printf("ASSIGN ");
+	return ASSIGN;
 }
-   
+
+"+=" {
+	adjust();
+	return INC;
+}
+
+"-=" {
+	adjust();
+	return DEC;
+}
+	
+"*=" {
+	adjust();
+	return MULT;
+}
+
+"/=" {
+	adjust();
+	return MOD;
+}
+
+"%=" {
+	adjust();
+	return REST;
+}
+
+"?" {
+	adjust();
+	return QUESTION;
+}
+   	
 ":" {
 	adjust();
-	printf("COLON ");
+	return COLON;
 }
      
 [ \t\n]+ {
@@ -346,13 +379,13 @@ break {
 %%
 
 void adjust(){
-	//if(strcmp(yytext, "\n") == 0){
-	//	EM_newline();
-	//	EM_tokPos = 0;
-	//} else {
-	//	EM_tokPos++;
-	//	EM_tokPos += (int)strlen(yytext);
-	//}
+	if(strcmp(yytext, "\n") == 0){
+		EM_newline();
+		EM_tokPos = 0;
+	} else {
+		EM_tokPos++;
+		EM_tokPos += (int)strlen(yytext);
+	}
 }
      
 int main (int argc, char **argv) {  
