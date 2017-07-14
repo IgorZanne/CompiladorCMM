@@ -38,6 +38,7 @@ void yyerror(char *s)
   ARRAY IF THEN ELSE WHILE FOR TO DO IN END OF 
   BREAK NIL
   FUNCTION VAR TYPE
+  READ WRITE BOOL RETURN NOT INC DEC MULT MOD REST QUESTION
 
 %type <A_exp> expr oper atrib lite
 
