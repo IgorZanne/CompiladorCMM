@@ -7,7 +7,7 @@
 #include <math.h>
 #include <string.h>
 #include "errormsg.h"
-#include "cmm-BACKUP.tab.h"
+#include "cmm.tab.h"
 #include "util.h"
 
 
