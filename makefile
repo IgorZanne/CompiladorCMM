@@ -5,7 +5,7 @@ CC=gcc
 LINK=gcc
  
 .PHONY : all
-all : app
+all : lexer.c parser.c app 
  
 # Link the object files into a binary
 app : main.o
@@ -14,8 +14,14 @@ app : main.o
 # Compile the source files into object files
 #main.o : main.c
 #    $(CC) -oteste main.c cmm.tab.c lex.yy.c errormsg.c util.c 
+
+parser.c: cmm.y
+    bison -d cmm.y
+    
+lexer.c: cmm.flex
+    flex cmm.flex
  
 # Clean target
 .PHONY : clean
 clean :
-    rm main.o app 
+   rm main.o app 
