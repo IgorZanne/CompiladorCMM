@@ -115,14 +115,6 @@ static void traverse_exp(A_exp exp)
         case A_breakExp:
             break;
 
-        case A_letExp:
-            S_beginScope(_env);
-            for (s = exp->u.let.decs; s; s = s->tail)
-                traverse_dec(s->head);
-            traverse_exp(exp->u.let.body);
-            S_endScope(_env);
-            break;
-
         case A_arrayExp:
             traverse_exp(exp->u.array.size);
             traverse_exp(exp->u.array.init);
