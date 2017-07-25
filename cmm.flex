@@ -86,7 +86,7 @@ return {
 
 string {
 	adjust();
-	return STRING;
+	return STR;
 }
 
 int {
@@ -114,7 +114,7 @@ break {
 {DIGIT}+ {
 	adjust();
 	yylval.ival = atoi(yytext);
-	return INT;
+	return INTEGER;
 }
 
      
