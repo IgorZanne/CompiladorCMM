@@ -28,7 +28,7 @@ void yyerror(char *s)
   }
 
 %token <sval> ID STRING
-%token <ival> INT
+%token <ival> INTEGER
 
 %token 
   COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK
@@ -36,7 +36,7 @@ void yyerror(char *s)
   PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE PERC
   AND OR ASSIGN
   ARRAY IF THEN ELSE WHILE FOR TO DO IN END OF 
-  BREAK NIL
+  BREAK NIL STR INT
   FUNCTION VAR TYPE
   READ WRITE BOOL RETURN NOT INC DEC MULT MOD REST QUESTION
 
@@ -63,8 +63,8 @@ expr:
     ID atrib oper {$$=A_AssignExp(EM_tokPos, $1, $3);}
 
 lite:
-    INT    {$$=A_IntExp(EM_tokPos, $1);}
-  | STRING {$$=A_StringExp(EM_tokPos, $1);}
+    INTEGER    {$$=A_IntExp(EM_tokPos, $1);}
+  | STRING     {$$=A_StringExp(EM_tokPos, $1);}
 
 oper:
     lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
