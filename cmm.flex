@@ -105,7 +105,7 @@ break {
 	char* name = (char*)malloc((yyleng+1)*sizeof(char));
 	strcpy(name, yytext);
 
-	//yylval.sval = name;
+	yylval.sval = name;
 
 	adjust();
 	return ID;
@@ -113,7 +113,7 @@ break {
      
 {DIGIT}+ {
 	adjust();
-	//yylval.ival = atoi(yytext);
+	yylval.ival = atoi(yytext);
 	return INT;
 }
 
@@ -151,7 +151,7 @@ break {
 		
 		*string_ptr = '\0';
 
-		//yylval.sval = (char*)str;
+		yylval.sval = (char*)str;
 
 		BEGIN(INITIAL);
 		return STRING;

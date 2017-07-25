@@ -78,6 +78,7 @@ oper:
   | lite LE lite      {$$=A_OpExp(EM_tokPos, A_leOp, $1, $3);}
   | lite GE lite      {$$=A_OpExp(EM_tokPos, A_geOp, $1, $3);}
   | MINUS lite        {$$=A_OpExp(EM_tokPos, A_minusOp, NULL, $2);}
+  | lite              {$$=$1}
 
 atrib:  
     ASSIGN        {$$=NULL;}
