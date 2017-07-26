@@ -24,11 +24,12 @@ void yyerror(char *s)
   int pos;
   int ival;
   string sval;
-  struct A_exp_       *A_exp;
+  struct A_exp_ *A_exp;
+  struct A_ty_  *A_ty;
   }
 
-%token <sval> ID STRING
-%token <ival> INTEGER
+%token <sval> ID STRING STR INT
+%token <ival> INTEGER 
 
 %token 
   COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK
@@ -36,11 +37,12 @@ void yyerror(char *s)
   PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE PERC
   AND OR ASSIGN
   ARRAY IF THEN ELSE WHILE FOR TO DO IN END OF 
-  BREAK NIL STR INT
+  BREAK NIL
   FUNCTION VAR TYPE
   READ WRITE BOOL RETURN NOT INC DEC MULT MOD REST QUESTION
 
 %type <A_exp> expr oper atrib lite
+%type <A_ty> type
 
 %nonassoc ASSIGN
 
@@ -60,11 +62,15 @@ void yyerror(char *s)
 program: expr {absyn_root=$1;}
 
 expr:
-    ID atrib oper {$$=A_AssignExp(EM_tokPos, $1, $3);}
+    type ID atrib oper {$$=A_AssignExp(EM_tokPos, $2, $4);}
 
 lite:
-    INTEGER    {$$=A_IntExp(EM_tokPos, $1);}
-  | STRING     {$$=A_StringExp(EM_tokPos, $1);}
+    INTEGER {$$=A_IntExp(EM_tokPos, $1);}
+  | STRING  {$$=A_StringExp(EM_tokPos, $1);}
+
+type: 
+    INT {$$=A_TypeDec(EM_tokPos, S_Symbol("int"), $1);} 
+  | STR {$$=A_TypeDec(EM_tokPos, S_Symbol("string"), $1);}
 
 oper:
     lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
@@ -78,7 +84,7 @@ oper:
   | lite LE lite      {$$=A_OpExp(EM_tokPos, A_leOp, $1, $3);}
   | lite GE lite      {$$=A_OpExp(EM_tokPos, A_geOp, $1, $3);}
   | MINUS lite        {$$=A_OpExp(EM_tokPos, A_minusOp, NULL, $2);}
-  | lite              {$$=$1}
+  | lite              {$$=$1;}
 
 atrib:  
     ASSIGN        {$$=NULL;}
