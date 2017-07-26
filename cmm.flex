@@ -86,11 +86,13 @@ return {
 
 string {
 	adjust();
+	yylval.sval = "string";
 	return STR;
 }
 
 int {
 	adjust();
+	yylval.sval = "int"; 
 	return INT;
 }
 
