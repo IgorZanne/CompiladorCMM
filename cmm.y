@@ -62,15 +62,15 @@ void yyerror(char *s)
 program: expr {absyn_root=$1;}
 
 expr:
-    type ID atrib oper {$$=A_AssignExp(EM_tokPos, $2, $4);}
+    type ID atrib oper {$$=A_VarDec(EM_tokPos, S_Symbol($2), S_Symbol($1), $4);}
 
 lite:
     INTEGER {$$=A_IntExp(EM_tokPos, $1);}
   | STRING  {$$=A_StringExp(EM_tokPos, $1);}
 
 type: 
-    INT {$$=A_TypeDec(EM_tokPos, S_Symbol("int"), $1);} 
-  | STR {$$=A_TypeDec(EM_tokPos, S_Symbol("string"), $1);}
+    INT {$$=A_NameTy(EM_tokPos, S_Symbol($1));} 
+  | STR {$$=A_NameTy(EM_tokPos, S_Symbol($1));}
 
 oper:
     lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}

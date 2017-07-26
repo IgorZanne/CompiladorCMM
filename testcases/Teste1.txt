@@ -1,1 +1,1 @@
-str1 = 2 - 1
+string str1 = 2 - 1
