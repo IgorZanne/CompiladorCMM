@@ -24,6 +24,7 @@ void yyerror(char *s)
   int pos;
   int ival;
   string sval;
+  struct A_dec_ *A_dec;
   struct A_exp_ *A_exp;
   struct A_ty_  *A_ty;
   }
@@ -41,7 +42,8 @@ void yyerror(char *s)
   FUNCTION VAR TYPE
   READ WRITE BOOL RETURN NOT INC DEC MULT MOD REST QUESTION
 
-%type <A_exp> expr oper atrib lite
+%type <A_exp> expr oper rela atrib lite
+%type <A_dec> vard
 %type <A_ty> type
 
 %nonassoc ASSIGN
@@ -62,6 +64,12 @@ void yyerror(char *s)
 program: expr {absyn_root=$1;}
 
 expr:
+    vard                                                             {$$=$1;}
+  | oper                                                             {$$=$1;}
+  | IF LPAREN rela RPAREN LBRACE expr RBRACE                         {$$=A_IfExp(EM_tokPos, $3, $6, NULL);}
+  | IF LPAREN rela RPAREN LBRACE expr RBRACE ELSE LBRACE expr RBRACE {$$=A_IfExp(EM_tokPos, $3, $6, $10);}
+
+vard:
     type ID atrib oper {$$=A_VarDec(EM_tokPos, S_Symbol($2), S_Symbol($1), $4);}
 
 lite:
@@ -72,17 +80,19 @@ type:
     INT {$$=A_NameTy(EM_tokPos, S_Symbol($1));} 
   | STR {$$=A_NameTy(EM_tokPos, S_Symbol($1));}
 
-oper:
-    lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
-  | lite DIVIDE lite  {$$=A_OpExp(EM_tokPos, A_divideOp, $1, $3);}
-  | lite MINUS lite   {$$=A_OpExp(EM_tokPos, A_minusOp, $1, $3);}
-  | lite PLUS lite    {$$=A_OpExp(EM_tokPos, A_plusOp, $1, $3);}
-  | lite GT lite      {$$=A_OpExp(EM_tokPos, A_gtOp, $1, $3);}
+rela:
+    lite GT lite      {$$=A_OpExp(EM_tokPos, A_gtOp, $1, $3);}
   | lite LT lite      {$$=A_OpExp(EM_tokPos, A_ltOp, $1, $3);}
   | lite NEQ lite     {$$=A_OpExp(EM_tokPos, A_neqOp, $1, $3);}
   | lite EQ lite      {$$=A_OpExp(EM_tokPos, A_eqOp, $1, $3);}
   | lite LE lite      {$$=A_OpExp(EM_tokPos, A_leOp, $1, $3);}
   | lite GE lite      {$$=A_OpExp(EM_tokPos, A_geOp, $1, $3);}
+
+oper:
+    lite TIMES lite   {$$=A_OpExp(EM_tokPos, A_timesOp, $1, $3);}
+  | lite DIVIDE lite  {$$=A_OpExp(EM_tokPos, A_divideOp, $1, $3);}
+  | lite MINUS lite   {$$=A_OpExp(EM_tokPos, A_minusOp, $1, $3);}
+  | lite PLUS lite    {$$=A_OpExp(EM_tokPos, A_plusOp, $1, $3);}
   | MINUS lite        {$$=A_OpExp(EM_tokPos, A_minusOp, NULL, $2);}
   | lite              {$$=$1;}
 
