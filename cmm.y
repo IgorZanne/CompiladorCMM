@@ -68,6 +68,7 @@ expr:
   | oper                                                             {$$=$1;}
   | IF LPAREN rela RPAREN LBRACE expr RBRACE                         {$$=A_IfExp(EM_tokPos, $3, $6, NULL);}
   | IF LPAREN rela RPAREN LBRACE expr RBRACE ELSE LBRACE expr RBRACE {$$=A_IfExp(EM_tokPos, $3, $6, $10);}
+  | WHILE LPAREN rela RPAREN LBRACE expr RBRACE                      {$$=A_WhileExp(EM_tokPos, $3, $6);}
 
 vard:
     type ID atrib oper {$$=A_VarDec(EM_tokPos, S_Symbol($2), S_Symbol($1), $4);}
